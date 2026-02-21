@@ -1,0 +1,31 @@
+services:
+  car-price-app:
+    container_name: car-ml-container
+    build: .
+    image: car-ml-dev-image
+
+    volumes:
+      - .:/app              
+      - /app/__pycache__  # avoid caching issues so, no mount for __pycache__
+
+    ports:
+      - "5000:5000"
+    
+    env_file:
+      - .env
+
+    environment:
+      - FLASK_ENV=${FLASK_ENV}
+      - PYTHONDONTWRITEBYTECODE=${PYTHONDONTWRITEBYTECODE}
+      - TEMPLATES_AUTO_RELOAD=true
+
+    command: >
+      gunicorn server:app
+      --bind 0.0.0.0:5000
+      --workers 1
+      --timeout 120
+      --reload
+      --reload-engine poll
+      --log-level debug
+
+    restart: unless-stopped
